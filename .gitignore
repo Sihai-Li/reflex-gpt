@@ -13,6 +13,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore ai.py which includes my API key
+reflex_gpt/chat/ai.py
+
 # Distribution / packaging
 .Python
 build/
