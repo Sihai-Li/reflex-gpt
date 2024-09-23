@@ -1,6 +1,7 @@
 from typing import List
 import reflex as rx
 import asyncio
+from reflex_gpt.models import Chat
 
 from . import ai
 
@@ -17,6 +18,15 @@ class ChatState(rx.State):
     @rx.var
     def user_did_submit(self) -> bool:
         return self.did_submit
+    
+    def on_load(self):
+        with rx.session() as session:
+            Chat
+            results = session.exec(
+                Chat.select()
+            ).all()
+            print(results)
+
     
     def append_message(self, message, is_bot:bool = False):
         self.messages.append(
