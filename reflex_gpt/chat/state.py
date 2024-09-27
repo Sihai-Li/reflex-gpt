@@ -1,7 +1,7 @@
 from typing import List
 import reflex as rx
 import asyncio
-from reflex_gpt.models import ChatSession as ChatModel
+from reflex_gpt.models import ChatSession, ChatSessionMessageModel
 
 from . import ai
 
@@ -12,6 +12,7 @@ class ChatMessage(rx.Base):
 
 
 class ChatState(rx.State):
+    chat_session: ChatSession = None
     did_submit: bool = False
     messages: List[ChatMessage] = []
 
@@ -20,29 +21,44 @@ class ChatState(rx.State):
         return self.did_submit
     
     def on_load(self):
-        with rx.session() as session:
-            results = session.exec(
-                ChatModel.select()
-            ).all()
-            print(results)
+        print("running on load")
+        if self.chat_session is None: 
+            with rx.session() as db_session:
+                obj = ChatSession()
+                db_session.add(obj) # prepare to save
+                db_session.commit() # actually save 
+                db_session.refresh(obj)
+                print(obj, obj.id)
+                self.chat_session = obj
+    
+    def insert_message_to_db(self, content, role = 'unknown'):
+        print("insert message data to db")
+        if self.chat_session is None:
+            return
+        if not isinstance(self.chat_session, ChatSession):
+            return
+        with rx.session() as db_session:
+            data = {
+                "session_id": self.chat_session.id,
+                "content": content,
+                "role": role
+            }
+            obj = ChatSessionMessageModel(**data)
+            db_session.add(obj) # prepare to save
+            db_session.commit() # actually save 
+
 
     
-    def append_message(self, message, is_bot:bool = False):
-        # if not is_bot:
-        #     with rx.session() as session:
-                
-        #         obj =  ChatModel(
-        #                 title=message, 
-        #         )
-        #         session.add(obj)
-        #         session.commit()
-
+    def append_message_to_ui(self, message, is_bot:bool = False):
+        if self.chat_session is not None:
+            print(self.chat_session.id)
         self.messages.append(
             ChatMessage(
                 message = message,
                 is_bot= is_bot
             )
         )
+
     def get_gpt_messages(self):
         # openai GPT format
         gpt_messages = [
@@ -69,13 +85,15 @@ class ChatState(rx.State):
         user_message = form_data.get('message')
         if user_message:
             self.did_submit = True
-            self.append_message(user_message, is_bot= False)
+            self.append_message_to_ui(user_message, is_bot= False)
+            self.insert_message_to_db(user_message, role = "user")
             yield
             gpt_messages = self.get_gpt_messages()
             bot_response = ai.get_llm_response(gpt_messages)
             # await asyncio.sleep(2)
             self.did_submit = False
-            self.append_message(bot_response, is_bot= True)
+            self.append_message_to_ui(bot_response, is_bot= True)
+            self.insert_message_to_db(bot_response, role = "system")
             yield
 
 
