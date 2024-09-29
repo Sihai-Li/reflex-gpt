@@ -29,7 +29,13 @@ def chat_page():
 
     return ui.base_layout(
         rx.vstack(
-            rx.heading("Let's chat here", size="9"),
+            rx.hstack(
+                rx.heading("Let's chat here", size="5"),
+                rx.cond(ChatState.not_found, "Not found", "Found"),
+                rx.button("+ New Chat", on_click= ChatState.create_new_and_redirect)
+            ),
+
+            
             rx.box(
                 rx.foreach(ChatState.messages, message_box),
                 width = '100%'
