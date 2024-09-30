@@ -3,7 +3,7 @@ name: Build and Push Container
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
     paths:
       - "Dockerfile.production"
       - "compose.prod.yaml"
@@ -16,15 +16,15 @@ on:
       - .github/workflows/build.yaml
 
 env:
-  DOCKER_IMAGE: codingforentrepreneurs/reflex-gpt
+  # DOCKER_IMAGE: codingforentrepreneurs/reflex-gpt
   # uncomment if using 
-  # DOCKER_IMAGE: ${{ secrets.DOCKERHUB_REPO }}
+  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_REPO }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -41,6 +41,7 @@ jobs:
     - name: Create build env file
       run: |
          cat << EOF > .build-env
+         OPENAI_API_KEY = ${{ secrets.OPENAI_API_KEY }}
          DATABASE_URL=${{ secrets.DATABASE_URL }}
          EOF
 
