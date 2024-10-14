@@ -52,11 +52,14 @@ jobs:
     - name: Echo Docker Buildx command
       run: echo "docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production ."
 
-    - name: Build and push with Docker Buildx (Verbose)
+    - name: Build and push with Docker Buildx
       run: |
         docker buildx create --use
-        docker buildx build --progress=plain --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
-
+        docker buildx build --progress=plain --push \
+          --tag ${{ env.DOCKER_IMAGE }}:latest \
+          --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} \
+          -f Dockerfile.production .
+          # The dot here (.) is the build context, make sure it's explicitly specified
     
     - name: Remove build env file
       run: rm .build-env
