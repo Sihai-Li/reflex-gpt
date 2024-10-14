@@ -3,7 +3,7 @@ name: Build and Push Container
 on:
   workflow_dispatch:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     paths:
       - "Dockerfile.production"
       - "compose.prod.yaml"
@@ -41,7 +41,7 @@ jobs:
     - name: Create build env file
       run: |
          cat << EOF > .build-env
-         OPENAI_API_KEY = ${{ secrets.OPENAI_API_KEY }}
+         OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
          DATABASE_URL=${{ secrets.DATABASE_URL }}
          EOF
 
