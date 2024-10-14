@@ -2,7 +2,7 @@ from decouple import config
 from openai import OpenAI
 
 OPENAI_API_KEY= config("OPENAI_API_KEY", cast=str, default=None)
-OPENAI_MODEL="gpt-4o-mini"
+OPENAI_MODEL="gpt-3.5-turbo"
 
 def get_client():
     return OpenAI(api_key=OPENAI_API_KEY)
