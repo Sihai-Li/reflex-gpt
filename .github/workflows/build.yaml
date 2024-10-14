@@ -45,13 +45,18 @@ jobs:
          DATABASE_URL=${{ secrets.DATABASE_URL }}
          EOF
 
+    - name: Check directory contents for Dockerfile
+      run: ls -la
+
+
     - name: Echo Docker Buildx command
       run: echo "docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production ."
 
-    - name: Build and push with Docker Buildx
+    - name: Build and push with Docker Buildx (Verbose)
       run: |
         docker buildx create --use
-        docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
+        docker buildx build --progress=plain --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
 
+    
     - name: Remove build env file
       run: rm .build-env
