@@ -45,8 +45,10 @@ jobs:
          DATABASE_URL=${{ secrets.DATABASE_URL }}
          EOF
 
-    - name: Build and push
-      run: docker buildx create --use && docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
+    - name: Build and push with Docker Buildx
+      run: |
+         docker buildx create --use
+         docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
 
 
     - name: Remove build env file
