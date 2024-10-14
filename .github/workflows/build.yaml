@@ -46,10 +46,8 @@ jobs:
          EOF
 
     - name: Build and push
-      run: |
-        docker build -f Dockerfile.production -t ${{ env.DOCKER_IMAGE }}:latest .
-        docker tag ${{ env.DOCKER_IMAGE }}:latest ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-        docker push ${{ env.DOCKER_IMAGE }} --all-tags
+      run: docker buildx create --use && docker buildx build --push --tag ${{ env.DOCKER_IMAGE }}:latest --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }} -f Dockerfile.production .
+
 
     - name: Remove build env file
       run: rm .build-env
